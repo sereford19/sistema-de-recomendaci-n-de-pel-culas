@@ -1,0 +1,182 @@
+main.cpp
+
+#include <iostream>
+#include <string>
+#include "MovieBST.h"
+#include "MovieQueue.h"
+#include "GenreList.h"
+
+int main() {
+    MovieBST movieDatabase;
+    MovieQueue watchLaterQueue;
+    GenreList genreList;
+
+    // Agregar algunas películas y géneros al sistema
+    movieDatabase.insertMovie("Inception", 2010, "Sci-Fi", 8.8);
+    movieDatabase.insertMovie("The Godfather", 1972, "Crime", 9.2);
+    genreList.addGenre("Sci-Fi");
+    genreList.addGenre("Crime");
+
+    // Buscar y mostrar películas
+    std::cout << "Películas en el sistema:\n";
+    movieDatabase.printMovies();
+
+    // Agregar a la lista de "watch later"
+    watchLaterQueue.enqueue("Inception");
+
+    // Mostrar lista de "watch later"
+    std::cout << "\nLista de 'watch later':\n";
+    watchLaterQueue.printQueue();
+
+    return 0;
+}
+
+MovieBST.h y MovieBST.cpp
+
+// MovieBST.h
+#ifndef MOVIEBST_H
+#define MOVIEBST_H
+
+#include <string>
+
+struct MovieNode {
+    std::string title;
+    int year;
+    std::string genre;
+    double rating;
+    MovieNode* left;
+    MovieNode* right;
+
+    MovieNode(std::string t, int y, std::string g, double r) : title(t), year(y), genre(g), rating(r), left(nullptr), right(nullptr) {}
+};
+
+class MovieBST {
+public:
+    MovieBST();
+    ~MovieBST();
+    void insertMovie(std::string title, int year, std::string genre, double rating);
+    void printMovies();
+
+private:
+    MovieNode* root;
+    void insertMovie(MovieNode*& node, std::string title, int year, std::string genre, double rating);
+    void printMovies(MovieNode* node);
+    void destroyTree(MovieNode* node);
+};
+
+#endif
+
+// MovieBST.cpp
+#include "MovieBST.h"
+#include <iostream>
+
+MovieBST::MovieBST() : root(nullptr) {}
+
+MovieBST::~MovieBST() {
+    destroyTree(root);
+}
+
+void MovieBST::insertMovie(std::string title, int year, std::string genre, double rating) {
+    insertMovie(root, title, year, genre, rating);
+}
+
+void MovieBST::insertMovie(MovieNode*& node, std::string title, int year, std::string genre, double rating) {
+    if (node == nullptr) {
+        node = new MovieNode(title, year, genre, rating);
+    } else if (rating < node->rating) {
+        insertMovie(node->left, title, year, genre, rating);
+    } else {
+        insertMovie(node->right, title, year, genre, rating);
+    }
+}
+
+void MovieBST::printMovies() {
+    printMovies(root);
+}
+
+void MovieBST::printMovies(MovieNode* node) {
+    if (node != nullptr) {
+        printMovies(node->left);
+        std::cout << node->title << " (" << node->year << ") - " << node->genre << " - Rating: " << node->rating << std::endl;
+        printMovies(node->right);
+    }
+}
+
+void MovieBST::destroyTree(MovieNode* node) {
+    if (node != nullptr) {
+        destroyTree(node->left);
+        destroyTree(node->right);
+        delete node;
+    }
+}
+
+MovieQueue.h y MovieQueue.cpp
+
+// MovieQueue.h
+#ifndef MOVIEQUEUE_H
+#define MOVIEQUEUE_H
+
+#include <string>
+#include <queue>
+
+class MovieQueue {
+public:
+    void enqueue(const std::string& movie);
+    void printQueue();
+
+private:
+    std::queue<std::string> queue;
+};
+
+#endif
+
+// MovieQueue.cpp
+#include "MovieQueue.h"
+#include <iostream>
+
+void MovieQueue::enqueue(const std::string& movie) {
+    queue.push(movie);
+}
+
+void MovieQueue::printQueue() {
+    std::queue<std::string> temp = queue;
+    while (!temp.empty()) {
+        std::cout << temp.front() << std::endl;
+        temp.pop();
+    }
+}
+
+GenreList.h y GenreList.cpp
+
+// GenreList.h
+#ifndef GENRELIST_H
+#define GENRELIST_H
+
+#include <string>
+#include <list>
+
+class GenreList {
+public:
+    void addGenre(const std::string& genre);
+    void printGenres();
+
+private:
+    std::list<std::string> genres;
+};
+
+#endif
+
+// GenreList.cpp
+#include "GenreList.h"
+#include <iostream>
+
+void GenreList::addGenre(const std::string& genre) {
+    genres.push_back(genre);
+}
+
+void GenreList::printGenres() {
+    for (const auto& genre : genres) {
+        std::cout << genre << std::endl;
+    }
+}
+
